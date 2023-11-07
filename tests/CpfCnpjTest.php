@@ -22,6 +22,7 @@ use Samfelgar\CpfCnpj\Entities\CpfG;
 use Samfelgar\CpfCnpj\Entities\CpfH;
 use Samfelgar\CpfCnpj\Entities\CpfI;
 use Samfelgar\CpfCnpj\Entities\Package;
+use Samfelgar\CpfCnpj\Exceptions\CpfCnpjException;
 
 class CpfCnpjTest extends TestCase
 {
@@ -43,6 +44,45 @@ class CpfCnpjTest extends TestCase
         $response = $sut->cpfRequest(self::getFaker()->cpf(), $package);
 
         $this->assertInstanceOf($expected, $response);
+    }
+
+    #[Test]
+    public function itCannotGetCpfInfoWithCnpjPackage(): void
+    {
+        $client = $this->clientStub([]);
+        $requestFactory = $this->createStub(RequestFactoryInterface::class);
+        $sut = new CpfCnpj($client, $requestFactory, self::TOKEN);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $sut->cpfRequest(self::getFaker()->cpf(), Package::CnpjA);
+    }
+
+    #[Test]
+    public function itCannotGetCpfInfoWithInvalidCpfLength(): void
+    {
+        $client = $this->clientStub([]);
+        $requestFactory = $this->createStub(RequestFactoryInterface::class);
+        $sut = new CpfCnpj($client, $requestFactory, self::TOKEN);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $sut->cpfRequest('12345', Package::CpfI);
+    }
+
+    #[Test]
+    public function itThrowsAnExceptionIfReturnedStatusIsZero(): void
+    {
+        $client = $this->clientStub([
+            'status' => 0,
+            'erro' => 'Test',
+            'erroCodigo' => 100,
+        ]);
+        $requestFactory = $this->createStub(RequestFactoryInterface::class);
+        $sut = new CpfCnpj($client, $requestFactory, self::TOKEN);
+
+        $this->expectException(CpfCnpjException::class);
+        $this->expectExceptionCode(100);
+        $this->expectExceptionMessage('Test');
+        $sut->cpfRequest(self::getFaker()->cpf(), Package::CpfI);
     }
 
     private function clientStub(array $response): ClientInterface
