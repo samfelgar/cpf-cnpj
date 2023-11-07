@@ -1,0 +1,21 @@
+{
+    "name": "samfelgar/cpf-cnpj",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Samfelgar\\CpfCnpj\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Samuel Felipe",
+            "email": "samfelgar@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "psr/http-client": "^1.0",
+        "psr/http-factory": "^1.0"
+    }
+}
